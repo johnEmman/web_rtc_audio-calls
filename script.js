@@ -14,15 +14,17 @@ document.getElementById("joinRoomButton").onclick = joinRoom;
 document.getElementById("hangupButton").onclick = hangUp;
 
 async function createRoom() {
-  socket.emit("createRoom"); // Emit event to create a room
+  socket.emit("createRoom");
 }
 
 async function joinRoom() {
-  const roomId = prompt("Enter Room ID to join:"); // Prompt for room ID
+  const roomId = prompt("Enter Room ID to join:");
   if (roomId) {
-    socket.emit("joinRoom", roomId); // Emit the room ID if it's valid
+    startTranscription();
+
+    socket.emit("joinRoom", roomId);
   } else {
-    displayError("Room ID cannot be empty!"); // Alert if empty
+    displayError("Room ID cannot be empty!");
   }
 }
 
@@ -52,6 +54,9 @@ async function startCall() {
     const offer = await peerConnection.createOffer();
     await peerConnection.setLocalDescription(offer);
     socket.emit("signal", { roomId: currentRoomId, offer });
+
+    // Start speech recognition automatically
+    // startTranscription();
   } catch (error) {
     console.error("Error starting call:", error);
     displayError("Error starting call. Please check your microphone settings.");
@@ -63,7 +68,7 @@ function hangUp() {
     peerConnection.close();
     peerConnection = null;
     console.log("Call ended.");
-    document.getElementById("hangupButton").disabled = true; // Disable hangup button
+    document.getElementById("hangupButton").disabled = true;
   } else {
     console.log("No active call to hang up.");
   }
@@ -72,7 +77,7 @@ function hangUp() {
 socket.on("signal", async (data) => {
   if (!peerConnection) {
     console.error("Peer connection is not initialized.");
-    return; // Exit if not initialized
+    return;
   }
 
   if (data.offer) {
@@ -93,9 +98,9 @@ socket.on("signal", async (data) => {
 
 // Listen for room join confirmations
 socket.on("roomJoined", (roomId) => {
-  currentRoomId = roomId; // Store room ID
+  currentRoomId = roomId;
   document.getElementById("roomInfo").innerText = `You are in room: ${roomId}`;
-  document.getElementById("hangupButton").disabled = false; // Enable hangup button
+  document.getElementById("hangupButton").disabled = false;
   startCall(); // Start the call
 });
 

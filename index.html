@@ -3,9 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WebRTC Audio Call</title>
+    <title>WebRTC Audio Call with Transcription</title>
     <script src="/socket.io/socket.io.js"></script>
     <script src="script.js" defer></script>
+    <script src="transcriber.js" defer></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      #transcription {
+        margin-top: 20px;
+        font-size: 2rem;
+        background-color: aqua;
+        width: 40rem;
+      }
+    </style>
   </head>
   <body>
     <h2>WebRTC Audio Call</h2>
@@ -15,5 +27,8 @@
     <audio id="remoteAudio" autoplay></audio>
     <div id="roomInfo"></div>
     <div id="errorMessage" style="color: red"></div>
+
+    <h1>Real-Time Speech to Text Transcriber</h1>
+    <div id="transcription"></div>
   </body>
 </html>
