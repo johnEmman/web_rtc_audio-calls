@@ -1,77 +1,68 @@
-const express = require("express"); // Import the Express framework
-const http = require("http"); // Import the built-in HTTP module
-const socketIo = require("socket.io"); // Import Socket.IO for real-time communication
-const path = require("path"); // Import the path module for handling file paths
+const express = require("express");
+const http = require("http");
+const socketIo = require("socket.io");
+const path = require("path");
 
-const app = express(); // Initialize an Express application
-const server = http.createServer(app); // Create an HTTP server using the Express app
-const io = socketIo(server); // Initialize Socket.IO for the server
+const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
 
-app.use(express.static(path.join(__dirname))); // Serve static files from the current directory
+const rooms = {}; // Store rooms
+
+// Serve static files
+app.use(express.static(path.join(__dirname)));
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html")); // Send index.html for the root URL
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
-const rooms = {}; // Object to store rooms
+// Function to generate a random room ID
+function generateRoomId(length = 6) {
+  return Math.random()
+    .toString(36)
+    .substring(2, length + 2)
+    .toUpperCase(); // Generate random ID in uppercase
+}
 
 io.on("connection", (socket) => {
-  // Listen for new socket connections
-  console.log("A user connected"); // Log connection
+  console.log("A user connected");
 
-  socket.on("createRoom", (roomId) => {
-    // Listen for room creation requests
-    if (!roomId) {
-      // Check if roomId is empty
-      socket.emit("error", "Room ID cannot be empty"); // Send error back
-      return;
-    }
+  socket.on("createRoom", () => {
+    let roomId;
+    do {
+      roomId = generateRoomId(); // Generate a new room ID
+    } while (rooms[roomId]); // Ensure uniqueness
 
-    if (!rooms[roomId]) {
-      // If the room does not exist
-      rooms[roomId] = { users: [] }; // Create a new room
-      rooms[roomId].users.push(socket.id); // Add user to the room
-      socket.join(roomId); // Join the socket to the room
-      socket.emit("roomJoined", roomId); // Confirm room joining
-      console.log(`Room created: ${roomId}`); // Log room creation
-    } else {
-      socket.emit("error", "Room already exists"); // Send error if room exists
-    }
+    rooms[roomId] = { users: [] };
+    rooms[roomId].users.push(socket.id);
+    socket.join(roomId);
+    socket.emit("roomJoined", roomId); // Send room ID back to client
+    console.log(`Room created: ${roomId}`);
   });
 
   socket.on("joinRoom", (roomId) => {
-    // Listen for room join requests
-    if (!roomId) {
-      // Check if roomId is empty
-      socket.emit("error", "Room ID cannot be empty"); // Send error back
-      return;
-    }
-
     if (rooms[roomId]) {
-      // If the room exists
-      rooms[roomId].users.push(socket.id); // Add user to the room
-      socket.join(roomId); // Join the socket to the room
-      socket.emit("roomJoined", roomId); // Confirm room joining
-      console.log(`User joined room: ${roomId}`); // Log user joining
+      rooms[roomId].users.push(socket.id);
+      socket.join(roomId);
+      socket.emit("roomJoined", roomId);
+      console.log(`User joined room: ${roomId}`);
     } else {
-      socket.emit("error", "Room does not exist"); // Send error if room does not exist
+      socket.emit("error", "Room does not exist");
     }
   });
 
   socket.on("signal", (data) => {
-    // Listen for signaling messages
-    const { roomId } = data; // Extract roomId from data
-    socket.to(roomId).emit("signal", data); // Forward signal to users in the room
+    const { roomId } = data;
+    socket.to(roomId).emit("signal", data);
   });
 
   socket.on("disconnect", () => {
-    // Listen for socket disconnections
-    console.log("A user disconnected"); // Log disconnection
+    console.log("A user disconnected");
+    // Optionally handle user disconnect logic here
   });
 });
 
-const PORT = process.env.PORT || 3000; // Set server port
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  // Start the server
-  console.log(`Server running on http://localhost:${PORT}`); // Log the running URL
+  console.log(`Server running on http://localhost:${PORT}`);
 });

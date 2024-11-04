@@ -6,14 +6,14 @@
     <title>WebRTC Audio Call</title>
     <script src="/socket.io/socket.io.js"></script>
     <script src="script.js" defer></script>
-    <!-- This should point to script.js -->
   </head>
   <body>
     <h2>WebRTC Audio Call</h2>
-    <input id="roomId" type="text" placeholder="Enter Room ID" />
     <button id="createRoomButton">Create Room</button>
     <button id="joinRoomButton">Join Room</button>
-    <button id="hangupButton">Hang Up</button>
+    <button id="hangupButton" disabled>Hang Up</button>
     <audio id="remoteAudio" autoplay></audio>
+    <div id="roomInfo"></div>
+    <div id="errorMessage" style="color: red"></div>
   </body>
 </html>
