@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebRTC Audio Call</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js" defer></script>
+    <!-- This should point to script.js -->
+  </head>
+  <body>
+    <h2>WebRTC Audio Call</h2>
+    <input id="roomId" type="text" placeholder="Enter Room ID" />
+    <button id="createRoomButton">Create Room</button>
+    <button id="joinRoomButton">Join Room</button>
+    <button id="hangupButton">Hang Up</button>
+    <audio id="remoteAudio" autoplay></audio>
+  </body>
+</html>
